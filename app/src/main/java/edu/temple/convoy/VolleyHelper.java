@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,12 +17,9 @@ import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import edu.temple.convoy.LoggedInActivity;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -57,7 +53,6 @@ public class VolleyHelper {
                     }
                 },
                 error -> {
-//61425a8b7096f
                     Toast.makeText(context, "Error, Please try again" + error.toString(), Toast.LENGTH_LONG).show();
                 }) {
             @Nullable
@@ -140,10 +135,6 @@ public class VolleyHelper {
                             edit.setText("Convoy Id: " + convoyId);
                             //TODO: convoyId is null on first go
 
-                             //conId = convoyId;
-                           // LoggedInActivity.getConvoyId(convoyId);
-                           // Intent intent = new Intent(context, LoggedInActivity.class);
-                           // intent.putExtra("convoyId", convoyId);
                             SharedPreferences sharedPref =  context.getSharedPreferences("myPref", MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPref.edit();
                             editor.putString("convoyId", convoyId);
@@ -178,8 +169,6 @@ public class VolleyHelper {
         requestQueue.add(stringRequest);
     }
 
-
-
     /**this function uses volley to end a convoy for a user*/
     public static void getVolleyEndConvoy(Context context, String action, String actionType){
         SharedPreferences sharedPref = context.getSharedPreferences("myPref", MODE_PRIVATE);
@@ -198,7 +187,6 @@ public class VolleyHelper {
                             Toast.makeText(context, "Leaving Convoy... ", Toast.LENGTH_LONG).show();
                         }
                         try {
-                            //Toast.makeText(context, result, Toast.LENGTH_LONG).show();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -208,7 +196,6 @@ public class VolleyHelper {
                     }
                 },
                 error -> {
-
                     Toast.makeText(context, "Error, Please try again" + error.toString(), Toast.LENGTH_LONG).show();
                 }) {
             @Nullable

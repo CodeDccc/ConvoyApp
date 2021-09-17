@@ -1,7 +1,7 @@
 package edu.temple.convoy;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -37,6 +37,7 @@ public class ConvoyControlFragment extends Fragment {
         }
     }
 
+    @SuppressLint("ResourceType")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -45,31 +46,17 @@ public class ConvoyControlFragment extends Fragment {
         startBtn = frame.findViewById(R.id.startBtn);
         joinBtn = frame.findViewById(R.id.joinBtn);
         leaveBtn = frame.findViewById(R.id.leaveBtn);
-        startBtn.setBackgroundColor(Color.GREEN);
-        leaveBtn.setBackgroundColor(Color.RED);
-        startBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                parentActivity.start();
-            }
-        });
-        joinBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                parentActivity.join();
-            }
-        });
-        leaveBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                parentActivity.leave();
-            }
-        });
-
+       // startBtn.setBackgroundColor(R.color.myColor);
+      //  leaveBtn.setBackgroundColor(R.color.myColor);
+       // joinBtn.setBackgroundColor(R.color.myColor);
+        startBtn.setOnClickListener(v -> parentActivity.start());
+        joinBtn.setOnClickListener(v -> parentActivity.join());
+        leaveBtn.setOnClickListener(v -> parentActivity.leave());
 
         return frame;
     }
 
+    /**interface used to send information to the logged in fragment*/
     interface ConvoyInterface{
         void join();
         void leave();

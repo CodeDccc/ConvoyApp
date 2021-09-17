@@ -1,40 +1,32 @@
 package edu.temple.convoy;
 
 
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 import android.text.InputType;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -42,27 +34,21 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import edu.temple.convoy.ForegroundService.MyLocalBinder;
 
 public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCallback, ConvoyControlFragment.ConvoyInterface, ForegroundService.Update {
     LocationManager locationManager;
-    LocationListener locationListener;
     Location myLocation;
     ForegroundService myService;
-    boolean isBound = false;
-   // TextView edit;
     private FloatingActionButton endCon;
     private Button logOutBtn;
     private String key;
-    private String convoyId;
     private TextView convoyText;
     private LatLng latLng;
     private final String NAME = "username";
@@ -77,13 +63,15 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
     Boolean joinedConvoy = false;
     GoogleMap map;
     Marker marker;
+
     public static SupportMapFragment mapFragment;
-    //float distance;
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logged_in);
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.myColor, null)));
 
         locationManager = getSystemService(LocationManager.class);
         convoyText = findViewById(R.id.convoyText);
@@ -110,10 +98,11 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         sharedPref = getSharedPreferences("myPref", MODE_PRIVATE);
         name = sharedPref.getString(NAME, null);
         key = sharedPref.getString(KEY, null);
-        setTitle("Hi " + name);
+        setTitle("Hello, " + name);
 
         /**Log out button, logs the user out*/
         logOutBtn = findViewById(R.id.logOutBtn);
+        logOutBtn.setBackgroundColor(Color.LTGRAY);
         logOutBtn.setOnClickListener(V ->{
             if(startedConvoy || joinedConvoy){
                 Toast.makeText(this, "Please end or leave convoy before logging out", Toast.LENGTH_LONG).show();
@@ -123,7 +112,6 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
                 editor.clear().apply();
                 startActivity(new Intent(this, MainActivity.class));
             }
-
         });
 
         /**end convoy button, this button is invisible until user have started a convoy*/
@@ -132,7 +120,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         endCon.setOnClickListener(v -> {
             if(startedConvoy) {
                 new AlertDialog.Builder(this)
-                        //.setIcon(android.R.drawable.ic_delete)
+                        .setIcon(R.drawable.endconvoy)
                         .setTitle("Stop Convoy")
                         .setMessage("Do you want to end convoy?")
                         .setPositiveButton("Confirm", (dialog, which) -> {
@@ -164,8 +152,8 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
 
     @SuppressLint("MissingPermission")
     @Override
-    public void onMapReady(GoogleMap map)
-    {
+    public void onMapReady(GoogleMap googleMap){
+        map = googleMap;
         if  (!haveGPSPermission()){
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
         }
@@ -177,9 +165,8 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             if (!startedConvoy) {
                 latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             }
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 20));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
             map.addMarker(new MarkerOptions().position(latLng).title("You are here"));
-            //map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
         }
     }
 
@@ -193,7 +180,6 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
     protected void onStop() {
         super.onStop();
         editor.clear().apply();
-        //locationManager.removeUpdates(locationListener);
     }
     private boolean haveGPSPermission(){
         return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
@@ -203,12 +189,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
     @SuppressLint("MissingPermission")
     private void doGPSStuff(){
         if (haveGPSPermission())
-
-           // locationManager.removeUpdates((LocationListener) this);
-           //myLocation.setMyLocationEnabeled(true);
-            myLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-           // locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 10, locationListener);
-           // locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener);
+           myLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
     }
 
 
@@ -228,6 +209,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         }
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
+
     private void getEndService(){
         Intent intent = new Intent(this, ForegroundService.class);
         unbindService(serviceConnection);
@@ -276,6 +258,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         }
         if(joinedConvoy) {
             AlertDialog.Builder myDialog = new AlertDialog.Builder(this);
+            myDialog.setIcon(R.drawable.endconvoy);
             myDialog.setTitle("Leave Convoy");
             myDialog.setMessage("Are you sure you want to leave convoy?");
             myDialog.setPositiveButton("Confirm", (dialog, which) -> {
@@ -304,7 +287,6 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             Log.d("TAG", "name: " + name.trim());
             Log.d("TAG", "key: " + key.trim());
             VolleyHelper.getVolleyStartConvoy(this, "action", "CREATE", name, key, convoyText);
-            //convoyId = sharedPref.getString(CONID, null);
             getStartService();
         }
         else{
@@ -316,36 +298,30 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-           // MyLocalBinder binder = (MyLocalBinder) service;
             myService =  ((ForegroundService.MyLocalBinder) service).getService();
             myService.registerActivity(LoggedInActivity.this);
-            isBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            isBound = false;
+
         }
     };
 
     @Override
-    public void updateLocation(LatLng value) {
-        //latLng = value;
-     //  marker.setPosition(value);
-       //map.addMarker(new MarkerOptions().position(value).title("You are here"));
-       //map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
-        Log.d("UpgradeFunc", "I am in Function");
+    public void updateLocation(Location value) {
+        LatLng valLatLng = new LatLng(value.getLatitude(), value.getLongitude());
+        if(marker == null){
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(valLatLng).title("You are here");
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.red_car_marker));
+            markerOptions.rotation(value.getBearing());
+            marker = map.addMarker(markerOptions);
+        }
+        else{
+            marker.setPosition(valLatLng);
+            marker.setRotation(value.getBearing());
+        }
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(valLatLng, 17));
     }
-
-    /*private LatLng helper(){
-        return latLng;
-    }*/
-
-   /* @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
-        latLng = new LatLng(39.993846, -75.171357);
-        googleMap.addMarker(new MarkerOptions().position(latLng).title("You are here"));
-    }*/
-
-
 }
