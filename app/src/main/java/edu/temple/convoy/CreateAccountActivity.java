@@ -28,6 +28,10 @@ public class CreateAccountActivity extends AppCompatActivity {
         /**button to register user*/
         findViewById(R.id.registerButton).setOnClickListener(v ->{
             register("action", "REGISTER");
+            firstnameText.setText("");
+            lastnameText.setText("");
+            usernameText.setText("");
+            passwordText.setText("");
         });
 
         /**cancel to cancel the registration process and go back to first screen*/

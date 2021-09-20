@@ -53,7 +53,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
     private LatLng latLng;
     private final String NAME = "username";
     private final String KEY = "sessionKey";
-    private final String CONID = "convoyId";
+    //private final String CONID = "convoyId";
     private String name;
     private FragmentManager fragmentManager;
     private ConvoyControlFragment convoyControlFragment;
@@ -102,6 +102,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
 
         /**Log out button, logs the user out*/
         logOutBtn = findViewById(R.id.logOutBtn);
+        logOutBtn.setTextColor(getResources().getColor(R.color.myColor, null));
         logOutBtn.setBackgroundColor(Color.LTGRAY);
         logOutBtn.setOnClickListener(V ->{
             if(startedConvoy || joinedConvoy){
@@ -138,6 +139,8 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             }
          });
     }
+
+    /**a notification is required for a foreground service*/
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void createNotificationChannel() {
         NotificationChannel notificationChannel = new NotificationChannel(
@@ -150,6 +153,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         notificationManager.createNotificationChannel(notificationChannel);
     }
 
+    /**when the map is ready, put a marker at users last known location*/
     @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap){
@@ -170,29 +174,38 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
+    /**on start of activity get users last known gps location*/
     @Override
     protected void onStart() {
         super.onStart();
         doGPSStuff();
     }
 
+    /**when this activity stops, clear all stored user information*/
     @Override
     protected void onStop() {
         super.onStop();
-        editor.clear().apply();
+        try {
+            editor.clear().apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
+
+    /**check if user gave permission*/
     private boolean haveGPSPermission(){
         return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
-
+    /**if permission is granted, get last known gps location*/
     @SuppressLint("MissingPermission")
     private void doGPSStuff(){
         if (haveGPSPermission())
            myLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
     }
 
-
+    /**check the users response for gps permission*/
     @Override
     public void onRequestPermissionsResult (int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -200,6 +213,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             doGPSStuff();
     }
 
+    /**this function starts a foreground service and binds LoggedInActivity to the service to enable the passing of info between the two*/
     private void getStartService(){
         Intent intent = new Intent(this, ForegroundService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -210,19 +224,22 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
+    /**this function ends the foreground service and unbind the service*/
     private void getEndService(){
         Intent intent = new Intent(this, ForegroundService.class);
         unbindService(serviceConnection);
         stopService(intent);
     }
 
-
+    /**this function join a convoy*/
     @Override
     public void join() {
+        /**check whether user started a convoy - can't join another convoy unless you end the one you started*/
         if(startedConvoy){
             Toast.makeText(this, "You already started a convoy", Toast.LENGTH_LONG).show();
             return;
         }
+        /**join convoy, if not already joined*/
         if(!joinedConvoy) {
             AlertDialog.Builder myDialog = new AlertDialog.Builder(this);
             myDialog.setIcon(R.drawable.joinconvoy);
@@ -250,12 +267,15 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
+    /**this function leaves the convoy*/
     @Override
     public void leave() {
+        /**check if convoy was joined*/
         if(startedConvoy){
             Toast.makeText(this, "Sorry you most click the end convoy button to leave...", Toast.LENGTH_LONG).show();
             return;
         }
+        /**if convoy joined, then leave convoy*/
         if(joinedConvoy) {
             AlertDialog.Builder myDialog = new AlertDialog.Builder(this);
             myDialog.setIcon(R.drawable.endconvoy);
@@ -274,18 +294,18 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
-
+    /**this function starts a convoy*/
     @Override
     public void start() {
+        /**check if convoy is already started*/
         if(joinedConvoy){
             Toast.makeText(this, "You most leave the convoy you are in before starting one...", Toast.LENGTH_LONG).show();
             return;
         }
+        /**if convoy not started, then start*/
         if(!startedConvoy) {
             startedConvoy = true;
             endCon.setVisibility(View.VISIBLE);
-            Log.d("TAG", "name: " + name.trim());
-            Log.d("TAG", "key: " + key.trim());
             VolleyHelper.getVolleyStartConvoy(this, "action", "CREATE", name, key, convoyText);
             getStartService();
         }
@@ -294,7 +314,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
-
+    /**connect to the service*/
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -308,6 +328,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         }
     };
 
+    /**get new locations from ForegroundServices class*/
     @Override
     public void updateLocation(Location value) {
         LatLng valLatLng = new LatLng(value.getLatitude(), value.getLongitude());

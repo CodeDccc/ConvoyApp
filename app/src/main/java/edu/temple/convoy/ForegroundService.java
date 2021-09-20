@@ -71,12 +71,14 @@ public class ForegroundService extends Service {
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 10, locationListener);
     }
 
+    /**this class is to return the service*/
     public class MyLocalBinder extends Binder{
         ForegroundService getService(){
             return ForegroundService.this;
         }
     }
 
+    /**this function is called whenever this service is called*/
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         notification = (new NotificationCompat.Builder(this, "convoy"))
@@ -91,16 +93,19 @@ public class ForegroundService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    /**stop updating location when service is destroyed*/
     @Override
     public void onDestroy() {
         super.onDestroy();
         locationManager.removeUpdates(locationListener);
     }
 
+    /**add context to parentactivity*/
     public void registerActivity(Context context){
         parentActivity = (LoggedInActivity) context;
     }
 
+    /** interface to pass info from service to loggedinactivity*/
     interface Update{
         void updateLocation(Location latLng);
     }

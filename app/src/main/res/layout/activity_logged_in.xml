@@ -23,8 +23,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start|top"
-        app:backgroundTint="@color/red"
-        android:src="@drawable/endconvoy" />
+        android:contentDescription="@string/end_convoy_button"
+        android:src="@drawable/endconvoy"
+        app:backgroundTint="@color/red" />
         android:contentDescription="@string/end_con" />
   </fragment>
 

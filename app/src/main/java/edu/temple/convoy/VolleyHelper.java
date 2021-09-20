@@ -41,10 +41,10 @@ public class VolleyHelper {
                             editor.putString("username", username );
                             editor.putString("sessionKey", sessionKey );
                             editor.apply();
-                            Log.d("TAG", "resultKey " + sessionKey);
+                           // Log.d("TAG", "resultKey " + sessionKey);
                           context.startActivity(new Intent(context, LoggedInActivity.class));
                         }
-                        Log.d(String.valueOf(context), "registeryyyyy: " + result);
+                       // Log.d(String.valueOf(context), "registeryyyyy: " + result);
                         Toast toast =  Toast.makeText(context, result, Toast.LENGTH_LONG);
                         toast.show();
                     } catch (JSONException e) {
@@ -130,10 +130,9 @@ public class VolleyHelper {
                         String result = jsonObject.getString("status");
 
                         if(result.equals("SUCCESS")) {
-                            Log.d("tag", "SUCCESSS " + "SUCCCUSEE");
+                           // Log.d("tag", "SUCCESSS " + "SUCCCUSEE");
                             String convoyId = jsonObject.getString("convoy_id");
                             edit.setText("Convoy Id: " + convoyId);
-                            //TODO: convoyId is null on first go
 
                             SharedPreferences sharedPref =  context.getSharedPreferences("myPref", MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPref.edit();
@@ -141,7 +140,7 @@ public class VolleyHelper {
                             editor.apply();
                             Log.d("TAG", "convoyId: " + convoyId);
                         }
-                        Log.d("TAG", "StartConvoy: " + result);
+                       // Log.d("TAG", "StartConvoy: " + result);
                         try {
                             Toast.makeText(context, result, Toast.LENGTH_LONG).show();
                         } catch (Exception e) {

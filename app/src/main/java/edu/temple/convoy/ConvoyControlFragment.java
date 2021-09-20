@@ -46,9 +46,6 @@ public class ConvoyControlFragment extends Fragment {
         startBtn = frame.findViewById(R.id.startBtn);
         joinBtn = frame.findViewById(R.id.joinBtn);
         leaveBtn = frame.findViewById(R.id.leaveBtn);
-       // startBtn.setBackgroundColor(R.color.myColor);
-      //  leaveBtn.setBackgroundColor(R.color.myColor);
-       // joinBtn.setBackgroundColor(R.color.myColor);
         startBtn.setOnClickListener(v -> parentActivity.start());
         joinBtn.setOnClickListener(v -> parentActivity.join());
         leaveBtn.setOnClickListener(v -> parentActivity.leave());
