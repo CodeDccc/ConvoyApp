@@ -41,6 +41,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCallback, ConvoyControlFragment.ConvoyInterface, ForegroundService.Update {
     LocationManager locationManager;
@@ -253,10 +254,16 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
                     Toast.makeText(this, "Convoy Id cannot be empty", Toast.LENGTH_LONG).show();
                 }
                 else {
-                    joinedConvoy = true;
-                    Toast.makeText(this, "Convoy Input is: " + convoyValue, Toast.LENGTH_LONG).show();
-                    getStartService();
-                    // TODO: convoyText.setText("Convoy ID: " + convoyId);
+                    try{
+                        joinedConvoy = true;
+                        //Toast.makeText(this, "Convoy Input is: " + convoyValue, Toast.LENGTH_LONG).show();
+                        VolleyHelper.getVolleyJoinConvoy(this, "action", "JOIN", convoyValue);
+                        getStartService();
+                        convoyText.setText("Convoy ID: " + convoyValue);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Error, please try again...", Toast.LENGTH_LONG).show();
+                    }
                 }
             });
             myDialog.setNegativeButton("Cancel", null);
@@ -284,6 +291,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             myDialog.setPositiveButton("Confirm", (dialog, which) -> {
                 getEndService();
                 joinedConvoy = false;
+                VolleyHelper.getVolleyLeaveConvoy(this, "action", "LEAVE");
                 convoyText.setText("");
             });
             myDialog.setNegativeButton("Cancel", null);
@@ -304,6 +312,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         }
         /**if convoy not started, then start*/
         if(!startedConvoy) {
+            //TODO: try catch to prevent a case where the convoy was not start, but service started anyways
             startedConvoy = true;
             endCon.setVisibility(View.VISIBLE);
             VolleyHelper.getVolleyStartConvoy(this, "action", "CREATE", name, key, convoyText);
