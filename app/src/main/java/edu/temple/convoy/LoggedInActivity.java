@@ -5,15 +5,18 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -38,12 +41,14 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.messaging.FirebaseMessaging;
 
-public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCallback, ConvoyControlFragment.ConvoyInterface, ForegroundService.Update {
+import java.util.Random;
+
+public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCallback, ConvoyControlFragment.ConvoyInterface, ForegroundService.Update{
     LocationManager locationManager;
     Location myLocation;
     ForegroundService myService;
@@ -64,7 +69,8 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
     Boolean joinedConvoy = false;
     GoogleMap map;
     Marker marker;
-
+    MarkerOptions myMarkerOptions = new MarkerOptions();
+    int[] cars = {R.drawable.blue_covertable, R.drawable.blue_limo, R.drawable.red_limo, R.drawable.yellow_car, R.drawable.yellow405_car};
     public static SupportMapFragment mapFragment;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -74,9 +80,15 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         setContentView(R.layout.activity_logged_in);
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.myColor, null)));
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter("edu.temple.convoy_FCM"));
+
         locationManager = getSystemService(LocationManager.class);
         convoyText = findViewById(R.id.convoyText);
+
         createNotificationChannel();
+
+        //FirebaseMessaging.getInstance().subscribeToTopic("worker");
+        //FirebaseSubscriptionHelper.subscribe(this, "worker");
 
         /**Get a fragment to attach google map*/
         mapFragment = (SupportMapFragment)getSupportFragmentManager()
@@ -94,7 +106,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
                     .add(R.id.convoyControl, convoyControlFragment)
                     .commit();
         }
-
+        
         /**get username to add to nav bar as a welcome, and get convoy id to show convoy id# when user is in a convoy*/
         sharedPref = getSharedPreferences("myPref", MODE_PRIVATE);
         name = sharedPref.getString(NAME, null);
@@ -126,11 +138,16 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
                         .setTitle("Stop Convoy")
                         .setMessage("Do you want to end convoy?")
                         .setPositiveButton("Confirm", (dialog, which) -> {
-                            VolleyHelper.getVolleyEndConvoy(this, "action", "END");
-                            endCon.setVisibility(View.INVISIBLE);
-                            getEndService();
-                            convoyText.setText("");
-                            startedConvoy = false;
+                            try{
+                                VolleyHelper.getVolleyEndConvoy(this, "action", "END");
+                                getEndService();
+                                endCon.setVisibility(View.INVISIBLE);
+                                convoyText.setText("");
+                                startedConvoy = false;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
                         })
                         .setNegativeButton("Cancel", null)
                         .show();
@@ -170,8 +187,10 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             if (!startedConvoy) {
                 latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             }
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
-            map.addMarker(new MarkerOptions().position(latLng).title("You are here"));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+            myMarkerOptions.position(latLng).title(name);
+            myMarkerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.red_car_marker));
+            marker = map.addMarker(myMarkerOptions);
         }
     }
 
@@ -193,6 +212,11 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+    }
 
     /**check if user gave permission*/
     private boolean haveGPSPermission(){
@@ -255,10 +279,10 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
                 }
                 else {
                     try{
-                        joinedConvoy = true;
                         //Toast.makeText(this, "Convoy Input is: " + convoyValue, Toast.LENGTH_LONG).show();
                         VolleyHelper.getVolleyJoinConvoy(this, "action", "JOIN", convoyValue);
                         getStartService();
+                        joinedConvoy = true;
                         convoyText.setText("Convoy ID: " + convoyValue);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -289,10 +313,15 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             myDialog.setTitle("Leave Convoy");
             myDialog.setMessage("Are you sure you want to leave convoy?");
             myDialog.setPositiveButton("Confirm", (dialog, which) -> {
-                getEndService();
-                joinedConvoy = false;
-                VolleyHelper.getVolleyLeaveConvoy(this, "action", "LEAVE");
-                convoyText.setText("");
+                try{
+                    VolleyHelper.getVolleyLeaveConvoy(this, "action", "LEAVE");
+                    getEndService();
+                    joinedConvoy = false;
+                    convoyText.setText("");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             });
             myDialog.setNegativeButton("Cancel", null);
             myDialog.show();
@@ -310,13 +339,18 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             Toast.makeText(this, "You most leave the convoy you are in before starting one...", Toast.LENGTH_LONG).show();
             return;
         }
-        /**if convoy not started, then start*/
+        /**if convoy not started, then start, and put in try block to prevent service from starting if error with starting convoy*/
         if(!startedConvoy) {
-            //TODO: try catch to prevent a case where the convoy was not start, but service started anyways
-            startedConvoy = true;
-            endCon.setVisibility(View.VISIBLE);
-            VolleyHelper.getVolleyStartConvoy(this, "action", "CREATE", name, key, convoyText);
-            getStartService();
+            //TODO:how to skip code if illegal exception found
+            try{
+                VolleyHelper.getVolleyStartConvoy(this, "action", "CREATE", name, key, convoyText);
+                getStartService();
+                startedConvoy = true;
+                endCon.setVisibility(View.VISIBLE);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
         else{
             Toast.makeText(this, "You already started a convoy!", Toast.LENGTH_LONG).show();
@@ -340,18 +374,71 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
     /**get new locations from ForegroundServices class*/
     @Override
     public void updateLocation(Location value) {
-        LatLng valLatLng = new LatLng(value.getLatitude(), value.getLongitude());
+        double lat = value.getLatitude();
+        double lon = value.getLongitude();
+        LatLng valLatLng = new LatLng(lat, lon);
+        try {
+            VolleyHelper.getVolleyUpdate(this, "action", "UPDATE", String.valueOf(lat), String.valueOf(lon));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         if(marker == null){
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(valLatLng).title("You are here");
-            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.red_car_marker));
-            markerOptions.rotation(value.getBearing());
-            marker = map.addMarker(markerOptions);
+            myMarkerOptions.position(valLatLng).title("You are here");
+            myMarkerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.red_car_marker));
+            myMarkerOptions.rotation(value.getBearing());
+            marker = map.addMarker(myMarkerOptions);
         }
         else{
             marker.setPosition(valLatLng);
             marker.setRotation(value.getBearing());
         }
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(valLatLng, 17));
+        //map.moveCamera(CameraUpdateFactory.newLatLngZoom(valLatLng, 15));
     }
+
+    private void updateOthersLocation(double[] lat, double[] lon, String[] username) {
+        Random random = new Random();
+        int numberOfObjects = lat.length;
+        MarkerOptions[] userMarkerOptions = new MarkerOptions[numberOfObjects];
+        Marker[] markers = new Marker[numberOfObjects];
+        Location[] locate = new Location[numberOfObjects];
+        LatLng[] valLatLng = new LatLng[numberOfObjects];
+        for (int i = 0; i < numberOfObjects ; i++) {
+            if (markers[i] == null) {
+                valLatLng[i] = new LatLng(lat[i], lon[i]);
+                userMarkerOptions[i] = new MarkerOptions();
+                userMarkerOptions[i].position(valLatLng[i]).title(username[i]);
+                userMarkerOptions[i].icon(BitmapDescriptorFactory.fromResource(cars[random.nextInt(cars.length)]));
+                locate[i] = new Location(LocationManager.GPS_PROVIDER);
+                locate[i].setLatitude(lat[i]);
+                locate[i].setLongitude(lon[i]);
+                userMarkerOptions[i].rotation(locate[i].getBearing());
+                markers[i] = map.addMarker(userMarkerOptions[i]);
+            } else {
+                markers[i].setPosition(valLatLng[i]);
+                markers[i].setRotation(locate[i].getBearing());
+            }
+        }
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for (Marker marker : markers) {
+            builder.include(marker.getPosition());
+           // Log.d("maker", "marker" + marker.getPosition());
+        }
+        if(markers[0]!=null) {
+           // builder.include(marker.getPosition());
+            Log.d("maker", "I CAME HERE" + markers[0].getPosition());
+            LatLngBounds bounds = builder.build();
+            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 250));
+        }
+    }
+
+     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String[] username = intent.getStringArrayExtra("username");
+            double[] lat = intent.getDoubleArrayExtra("lat");
+            double[] lon = intent.getDoubleArrayExtra("lon");
+            updateOthersLocation(lat, lon, username);
+        }
+    };
 }

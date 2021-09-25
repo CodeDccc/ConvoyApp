@@ -28,4 +28,6 @@
     <string name="start_convoy">Start Convoy</string>
     <string name="log_out">Log Out</string>
     <string name="end_convoy_button">End convoy button</string>
+    <string name="msg_subscribed">Subscribed!!!</string>
+    <string name="msg_subscribe_failed">Subscription Failed!</string>
 </resources>

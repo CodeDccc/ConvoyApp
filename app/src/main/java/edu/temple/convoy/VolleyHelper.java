@@ -134,7 +134,8 @@ public class VolleyHelper {
                            // Log.d("tag", "SUCCESSS " + "SUCCCUSEE");
                             String convoyId = jsonObject.getString("convoy_id");
                             edit.setText("Convoy Id: " + convoyId);
-                            FirebaseMessaging.getInstance().subscribeToTopic(convoyId);
+                           // FirebaseMessaging.getInstance().subscribeToTopic(convoyId);
+                            FirebaseSubscriptionHelper.subscribe(context, convoyId );
                             SharedPreferences sharedPref =  context.getSharedPreferences("myPref", MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPref.edit();
                             editor.putString("convoyId", convoyId);
@@ -233,7 +234,8 @@ public class VolleyHelper {
                             SharedPreferences.Editor editor = sharedPref.edit();
                             editor.putString("convoyId", convoyValue);
                             editor.apply();
-                            FirebaseMessaging.getInstance().subscribeToTopic(convoyValue);
+                            //FirebaseMessaging.getInstance().subscribeToTopic(convoyValue);
+                            FirebaseSubscriptionHelper.subscribe(context, convoyValue);
                         }
                         try {
                         } catch (Exception e) {
@@ -322,7 +324,7 @@ public class VolleyHelper {
                         String result = jsonObject.getString("status");
 
                         if(result.equals("SUCCESS")) {
-                            Toast.makeText(context, "Leaving Convoy... ", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Updating convoy... ", Toast.LENGTH_LONG).show();
                         }
                         try {
                         } catch (Exception e) {
