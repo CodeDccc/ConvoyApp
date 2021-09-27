@@ -341,7 +341,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         }
         /**if convoy not started, then start, and put in try block to prevent service from starting if error with starting convoy*/
         if(!startedConvoy) {
-            //TODO:how to skip code if illegal exception found
+            //TODO:how to skip code if IllegalArgument exception found - try interface inside volhelper to this class with method call to start service
             try{
                 VolleyHelper.getVolleyStartConvoy(this, "action", "CREATE", name, key, convoyText);
                 getStartService();
@@ -393,7 +393,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             marker.setPosition(valLatLng);
             marker.setRotation(value.getBearing());
         }
-        //map.moveCamera(CameraUpdateFactory.newLatLngZoom(valLatLng, 15));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(valLatLng, 15));
     }
 
     private void updateOthersLocation(double[] lat, double[] lon, String[] username) {
@@ -404,20 +404,23 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         Location[] locate = new Location[numberOfObjects];
         LatLng[] valLatLng = new LatLng[numberOfObjects];
         for (int i = 0; i < numberOfObjects ; i++) {
-            if (markers[i] == null) {
-                valLatLng[i] = new LatLng(lat[i], lon[i]);
-                userMarkerOptions[i] = new MarkerOptions();
-                userMarkerOptions[i].position(valLatLng[i]).title(username[i]);
-                userMarkerOptions[i].icon(BitmapDescriptorFactory.fromResource(cars[random.nextInt(cars.length)]));
-                locate[i] = new Location(LocationManager.GPS_PROVIDER);
-                locate[i].setLatitude(lat[i]);
-                locate[i].setLongitude(lon[i]);
-                userMarkerOptions[i].rotation(locate[i].getBearing());
-                markers[i] = map.addMarker(userMarkerOptions[i]);
-            } else {
-                markers[i].setPosition(valLatLng[i]);
-                markers[i].setRotation(locate[i].getBearing());
-            }
+           // if(!username[i].equals(name)) {
+                Log.d("watch", "USER" + numberOfObjects);
+                if (markers[i] == null) {
+                    valLatLng[i] = new LatLng(lat[i], lon[i]);
+                    userMarkerOptions[i] = new MarkerOptions();
+                    userMarkerOptions[i].position(valLatLng[i]).title(username[i]);
+                    userMarkerOptions[i].icon(BitmapDescriptorFactory.fromResource(cars[random.nextInt(cars.length)]));
+                    locate[i] = new Location(LocationManager.GPS_PROVIDER);
+                    locate[i].setLatitude(lat[i]);
+                    locate[i].setLongitude(lon[i]);
+                    userMarkerOptions[i].rotation(locate[i].getBearing());
+                    markers[i] = map.addMarker(userMarkerOptions[i]);
+                } else {
+                    markers[i].setPosition(valLatLng[i]);
+                    markers[i].setRotation(locate[i].getBearing());
+                }
+           // }
         }
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         for (Marker marker : markers) {

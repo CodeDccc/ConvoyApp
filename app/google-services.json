@@ -1,33 +1,34 @@
 {
   "project_info": {
-    "project_number": "400892351572",
-    "project_id": "convoyapp-f64df",
-    "storage_bucket": "convoyapp-f64df.appspot.com"
+    "project_number": "764849138700",
+    "firebase_url": "https://myfcmapp-3da61.firebaseio.com",
+    "project_id": "myfcmapp-3da61",
+    "storage_bucket": "myfcmapp-3da61.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:400892351572:android:2df1033dfcbab3819589c1",
+        "mobilesdk_app_id": "1:317716252612:android:a7c9589e93417358bac691",
         "android_client_info": {
           "package_name": "edu.temple.convoy"
         }
       },
       "oauth_client": [
         {
-          "client_id": "400892351572-qoa6gbi0vl7150vnsals13qebacqfrbf.apps.googleusercontent.com",
+          "client_id": "764849138700-d03ktdu020uqt8aav30gekqqdo5id68m.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBRhlxEILvyM613h6nDPbdhDqM4uFYWebo"
+          "current_key": "AIzaSyDiTlDGRFcFmTbksDOV2xIOTFTqCBxpGj0"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "400892351572-qoa6gbi0vl7150vnsals13qebacqfrbf.apps.googleusercontent.com",
+              "client_id": "764849138700-d03ktdu020uqt8aav30gekqqdo5id68m.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
