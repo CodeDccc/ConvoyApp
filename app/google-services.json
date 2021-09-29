@@ -1,9 +1,9 @@
 {
   "project_info": {
-    "project_number": "764849138700",
-    "firebase_url": "https://myfcmapp-3da61.firebaseio.com",
-    "project_id": "myfcmapp-3da61",
-    "storage_bucket": "myfcmapp-3da61.appspot.com"
+    "project_number": "317716252612",
+    "firebase_url": "https://mapproject-1487260540141.firebaseio.com",
+    "project_id": "mapproject-1487260540141",
+    "storage_bucket": "mapproject-1487260540141.appspot.com"
   },
   "client": [
     {
@@ -15,20 +15,20 @@
       },
       "oauth_client": [
         {
-          "client_id": "764849138700-d03ktdu020uqt8aav30gekqqdo5id68m.apps.googleusercontent.com",
+          "client_id": "317716252612-6vgghh7spfs6iim694p4bgjfubuhdrlg.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDiTlDGRFcFmTbksDOV2xIOTFTqCBxpGj0"
+          "current_key": "AIzaSyBfDXFHTsXTWHsGrso5tFmeu-LxP3XOTwU"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "764849138700-d03ktdu020uqt8aav30gekqqdo5id68m.apps.googleusercontent.com",
+              "client_id": "317716252612-6vgghh7spfs6iim694p4bgjfubuhdrlg.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

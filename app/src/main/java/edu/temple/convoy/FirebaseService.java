@@ -25,13 +25,12 @@ public class FirebaseService  extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-       // Log.d("TAG", "Refreshed token: " + token);
+        Log.d("TAG", "Refreshed token: " + token);
 
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
         // Instance ID token to your app server.
-        sendRegistrationToServer("fVrqPgVk_HM:APA91bFQxoC1LEbIpX7WcTY6Pqt9II7mCMGwzPTcwcXYB5EHrPPfUeV7A7pLirL_hZwhgH8IChxJY_3bsWQNKjge1qSZvrrpxpRgkK6wPeTgg-4TvO4bskicCvaQWhjyLCxnEz7zrPMD"
-);
+        sendRegistrationToServer(token);
     }
 
     private void sendRegistrationToServer(String refreshedToken) {
@@ -42,7 +41,7 @@ public class FirebaseService  extends FirebaseMessagingService {
 
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
-
+            Log.d("check", "i saw");
             // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             try {

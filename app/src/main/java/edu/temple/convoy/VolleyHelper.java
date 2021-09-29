@@ -42,7 +42,7 @@ public class VolleyHelper {
                             editor.putString("username", username );
                             editor.putString("sessionKey", sessionKey );
                             editor.apply();
-                           // Log.d("TAG", "resultKey " + sessionKey);
+                            Log.d("TAG", "resultKey " + sessionKey);
                           context.startActivity(new Intent(context, LoggedInActivity.class));
                         }
                        // Log.d(String.valueOf(context), "registeryyyyy: " + result);
