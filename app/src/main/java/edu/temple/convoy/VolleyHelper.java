@@ -240,14 +240,18 @@ public class VolleyHelper {
                         try {
                         } catch (Exception e) {
                             e.printStackTrace();
+                          //  Log.d("not","testing1 " + "this");
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Toast.makeText(context, "Error, Please try again " + e.toString(), Toast.LENGTH_LONG).show();
+                      //  Log.d("not","testing2 " + "that");
                     }
                 },
                 error -> {
                     Toast.makeText(context, "Error, Please try again" + error.toString(), Toast.LENGTH_LONG).show();
+
+                    //Log.d("not","testing3 " + error.toString());
                 }) {
             @Nullable
             @Override

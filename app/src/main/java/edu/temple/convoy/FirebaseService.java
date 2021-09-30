@@ -41,7 +41,7 @@ public class FirebaseService  extends FirebaseMessagingService {
 
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
-            Log.d("check", "i saw");
+            Log.d("check", "i saw " + remoteMessage.getData().toString());
             // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             try {
@@ -52,7 +52,7 @@ public class FirebaseService  extends FirebaseMessagingService {
                     lat[i] = object.getDouble("latitude");
                     lon[i] = object.getDouble("longitude");
                     username[i] = object.getString("username");
-                    Log.d("my", "WATCH" + username[i]);
+                    //Log.d("my", "WATCH" + username[i]);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

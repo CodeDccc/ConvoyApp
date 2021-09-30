@@ -281,14 +281,17 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
                     try{
                         //Toast.makeText(this, "Convoy Input is: " + convoyValue, Toast.LENGTH_LONG).show();
                         VolleyHelper.getVolleyJoinConvoy(this, "action", "JOIN", convoyValue);
-                        getStartService();
-                        joinedConvoy = true;
-                        convoyText.setText("Convoy ID: " + convoyValue);
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         Toast.makeText(this, "Error, please try again...", Toast.LENGTH_LONG).show();
+                        return;
                     }
+                    getStartService();
+                    joinedConvoy = true;
+                    convoyText.setText("Convoy ID: " + convoyValue);
                 }
+
             });
             myDialog.setNegativeButton("Cancel", null);
             myDialog.show();
@@ -404,7 +407,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         Location[] locate = new Location[numberOfObjects];
         LatLng[] valLatLng = new LatLng[numberOfObjects];
         for (int i = 0; i < numberOfObjects ; i++) {
-           // if(!username[i].equals(name)) {
+            if(!username[i].equals(name)) {
                 Log.d("watch", "USER" + numberOfObjects);
                 if (markers[i] == null) {
                     valLatLng[i] = new LatLng(lat[i], lon[i]);
@@ -420,7 +423,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
                     markers[i].setPosition(valLatLng[i]);
                     markers[i].setRotation(locate[i].getBearing());
                 }
-           // }
+            }
         }
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         for (Marker marker : markers) {

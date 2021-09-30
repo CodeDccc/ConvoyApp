@@ -12,7 +12,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import static android.content.ContentValues.TAG;
 
-public class FirebaseSubscriptionHelper {
+public class  FirebaseSubscriptionHelper {
 
     public static void subscribe(Context context, String convoyNo){
         FirebaseMessaging.getInstance().subscribeToTopic(convoyNo)
