@@ -3,7 +3,14 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Temmy/AndroidStudioProjects/ConvoyApp/app/src/main/res/drawable-anydpi/endconvoy.xml" value="0.21614583333333334" />
+        <entry key="..\:/Users/Temmy/AndroidStudioProjects/ConvoyApp/app/src/main/res/drawable-anydpi/sendrecord1.xml" value="0.21614583333333334" />
         <entry key="..\:/Users/Temmy/AndroidStudioProjects/ConvoyApp/app/src/main/res/drawable/button.xml" value="0.8392857142857143" />
+        <entry key="..\:/Users/Temmy/AndroidStudioProjects/ConvoyApp/app/src/main/res/layout/activity_logged_in.xml" value="0.22" />
+        <entry key="..\:/Users/Temmy/AndroidStudioProjects/ConvoyApp/app/src/main/res/layout/activity_main.xml" value="0.875" />
+        <entry key="..\:/Users/Temmy/AndroidStudioProjects/ConvoyApp/app/src/main/res/layout/activity_recycle.xml" value="0.4292763157894737" />
+        <entry key="..\:/Users/Temmy/AndroidStudioProjects/ConvoyApp/app/src/main/res/layout/fragment_convoy_control.xml" value="0.33" />
+        <entry key="..\:/Users/Temmy/AndroidStudioProjects/ConvoyApp/app/src/main/res/layout/record_clip.xml" value="0.3113342898134864" />
       </map>
     </option>
   </component>

@@ -3,6 +3,7 @@ package edu.temple.convoy;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -13,6 +14,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText usernameText;
     private EditText passwordText;
     SharedPreferences sharedPref;
+    private String checkSavedName;
+   // private String checkSavedPassword;
 
 
     @Override
@@ -21,6 +24,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         sharedPref = getSharedPreferences("myPref", MODE_PRIVATE);
+       // checkSavedName = sharedPref.getString("username", null);
+       // if(checkSavedName!=null){
+
+           // VolleyHelper.getVolleyLogIn(this,"action", "LOGIN", checkSavedName, password);
+      //  }
         usernameText = findViewById(R.id.usernameText);
         passwordText = findViewById(R.id.passwordText);
 
@@ -37,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, CreateAccountActivity.class));
 
         });
+
+
     }
 
 }

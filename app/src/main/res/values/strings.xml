@@ -30,4 +30,20 @@
     <string name="end_convoy_button">End convoy button</string>
     <string name="msg_subscribed">Subscribed!!!</string>
     <string name="msg_subscribe_failed">Subscription Failed!</string>
+    <string name="play_button">Play Button</string>
+    <string name="record_audio">record_audio</string>
+    <string name="audioTime">TextView</string>
+    <string name="userText">TextView</string>
+
+    <string-array name="prog">
+        <item>JAVA</item>
+        <item>C++</item>
+        <item>PYTHON</item>
+        <item>red</item>
+        <item>yellow</item>
+        <item>black</item>
+        <item>blue</item>
+        <item>friday</item>
+        <item>seven</item>
+    </string-array>
 </resources>

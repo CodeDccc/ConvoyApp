@@ -9,21 +9,20 @@
     <Button
         android:id="@+id/startBtn"
         android:layout_width="145dp"
-        android:layout_height="96dp"
-        android:layout_marginBottom="20dp"
-        android:text="@string/start_convoy"
+        android:layout_height="70dp"
         android:backgroundTint="@color/myColor"
+        android:text="@string/start_convoy"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/joinBtn"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="TouchTargetSizeCheck" />
 
     <Button
         android:id="@+id/joinBtn"
         android:layout_width="135dp"
-        android:layout_height="96dp"
-        android:layout_marginBottom="20dp"
-        android:text="@string/join_convoy"
+        android:layout_height="70dp"
         android:backgroundTint="@color/myColor"
+        android:text="@string/join_convoy"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/leaveBtn"
         app:layout_constraintStart_toEndOf="@+id/startBtn" />
@@ -31,12 +30,12 @@
     <Button
         android:id="@+id/leaveBtn"
         android:layout_width="137dp"
-        android:layout_height="96dp"
-        android:layout_marginBottom="20dp"
-        android:text="@string/leave_convoy"
+        android:layout_height="70dp"
         android:backgroundTint="@color/myColor"
+        android:text="@string/leave_convoy"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/joinBtn" />
+        app:layout_constraintStart_toEndOf="@+id/joinBtn"
+        tools:ignore="TouchTargetSizeCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

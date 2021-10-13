@@ -14,6 +14,8 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
@@ -357,6 +359,106 @@ public class VolleyHelper {
         };
         RequestQueue requestQueue = com.android.volley.toolbox.Volley.newRequestQueue(context);
         requestQueue.add(stringRequest);
+    }
+
+   public static void getVolleyUpdateFCM(Context context, String token){
+       SharedPreferences sharedPref = context.getSharedPreferences("myPref", MODE_PRIVATE);
+       sharedPref.edit().putBoolean("myToken", false).apply();
+       sharedPref.edit().putString("myToken", null);
+       String username = sharedPref.getString("username", null);
+       String sessionKey = sharedPref.getString("sessionKey", null);
+       final String URL = "https://kamorris.com/lab/convoy/convoy.php";
+       StringRequest stringRequest = new StringRequest(Request.Method.POST, URL,
+               response -> {
+                   try {
+                           JSONObject jsonObject = new JSONObject(response);
+                           String result = jsonObject.getString("status");
+
+                           if(result.equals("SUCCESS")) {
+                               sharedPref.edit().putBoolean("myToken", true).apply();
+                               Toast.makeText(context, "Updating FCM... ", Toast.LENGTH_LONG).show();
+                           }
+                           try {
+                           } catch (Exception e) {
+                               e.printStackTrace();
+                           }
+                       } catch (JSONException e) {
+                           e.printStackTrace();
+                           Toast.makeText(context, "Error, Please try again " + e.toString(), Toast.LENGTH_LONG).show();
+                       }
+                       },
+               error -> {
+                   Toast.makeText(context, "Error, Please try again" + error.toString(), Toast.LENGTH_LONG).show();
+               }) {
+           @Nullable
+           @Override
+           protected Map<String, String> getParams() throws AuthFailureError {
+               Map<String, String> params = new HashMap<>();
+               params.put("action", "UPDATE");
+               params.put("username", username);
+               params.put("session_key", sessionKey);
+               params.put("fcm_token", token);
+               return params;
+           }
+       };
+       RequestQueue requestQueue = com.android.volley.toolbox.Volley.newRequestQueue(context);
+       requestQueue.add(stringRequest);
+   }
+
+    public static void getVolleyUploadTokenIfNotAlreadyRegistered(Context context) {
+        SharedPreferences sharedPref = context.getSharedPreferences("myPref", MODE_PRIVATE);
+        String myToken = sharedPref.getString("myToken", null);
+        Log.d("token", "token " + myToken);
+        String username = sharedPref.getString("username", null);
+        String sessionKey = sharedPref.getString("sessionKey", null);
+        final String URL = "https://kamorris.com/lab/convoy/convoy.php";
+        if (myToken == null) {
+            FirebaseMessaging.getInstance()
+                    .getToken().addOnSuccessListener(s -> {
+                Log.d("token", "soso " + s);
+                sharedPref.edit().putString("myToken", s);
+                        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL,
+                                response -> {
+                                    try {
+                                        JSONObject jsonObject = new JSONObject(response);
+                                        String result = jsonObject.getString("status");
+
+                                        if(result.equals("SUCCESS")) {
+                                            sharedPref.edit().putBoolean("myToken", true).apply();
+                                            Toast.makeText(context, "Updating FCM... ", Toast.LENGTH_LONG).show();
+                                        }
+                                        else if (result.equals("ERROR")){
+                                            Log.d("try", "done " + result);
+                                        }
+                                        try {
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                        Toast.makeText(context, "Error, Please try again " + e.toString(), Toast.LENGTH_LONG).show();
+                                    }
+                                },
+                                error -> {
+                                    Toast.makeText(context, "Error, Please try again" + error.toString(), Toast.LENGTH_LONG).show();
+                                }) {
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Map<String, String> params = new HashMap<>();
+                                params.put("action", "UPDATE");
+                                params.put("username", username);
+                                params.put("session_key", sessionKey);
+                                params.put("fcm_token", s); // s is your token
+                                Log.d("token", "soso1 " + s);
+                                return params;
+                            }
+                        };
+                        RequestQueue requestQueue = Volley.newRequestQueue(context);
+                        requestQueue.add(stringRequest);
+                    });
+        }
+
     }
 }
 

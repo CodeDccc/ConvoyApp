@@ -10,36 +10,64 @@
   <fragment
       android:id="@+id/map"
       class="com.google.android.gms.maps.SupportMapFragment"
-      android:layout_width="424dp"
-      android:layout_height="459dp"
-      android:layout_marginTop="10dp"
+      android:layout_width="409dp"
+      android:layout_height="391dp"
+      android:layout_marginTop="5dp"
       app:layout_constraintBottom_toTopOf="@+id/convoyControl"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/convoyText">
+      app:layout_constraintTop_toBottomOf="@+id/recyclerView"
+      tools:ignore="ExtraText">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/endCon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start|top"
-        android:contentDescription="@string/end_convoy_button"
         android:src="@drawable/endconvoy"
-        app:backgroundTint="@color/red" />
-        android:contentDescription="@string/end_con" />
+        app:backgroundTint="@color/red"
+        android:contentDescription="@string/end_convoy_button"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/recordAudio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|top"
+        android:src="@drawable/mic"
+        app:backgroundTint="#d3d3d3"
+        android:contentDescription="@string/record_audio" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/sendrecord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|center"
+        android:src="@drawable/sendrecord"
+        android:backgroundTint="#ffffff"
+        android:contentDescription="@string/record_audio" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/cancelrecord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|top"
+        android:src="@drawable/cancelrecord"
+        app:backgroundTint="#ff0000"
+        android:contentDescription="@string/record_audio" />
+
   </fragment>
 
   <TextView
       android:id="@+id/convoyText"
-      android:layout_width="305dp"
-      android:layout_height="91dp"
+      android:layout_width="308dp"
+      android:layout_height="86dp"
       android:layout_marginTop="5dp"
       android:layout_marginBottom="10dp"
       android:gravity="bottom"
       android:textAlignment="center"
-      android:textStyle="bold"
       android:textSize="18sp"
-      app:layout_constraintBottom_toTopOf="@+id/map"
+      android:textStyle="bold"
+      app:layout_constraintBottom_toTopOf="@+id/recyclerView"
       app:layout_constraintEnd_toStartOf="@+id/logOutBtn"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
@@ -47,14 +75,12 @@
 
   <FrameLayout
       android:id="@+id/convoyControl"
-      android:layout_width="415dp"
-      android:layout_height="128dp"
-      android:layout_marginBottom="20dp"
+      android:layout_width="409dp"
+      android:layout_height="66dp"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintHorizontal_bias="0.0"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/map">
+      app:layout_constraintStart_toStartOf="parent">
 
   </FrameLayout>
 
@@ -62,11 +88,26 @@
       android:id="@+id/logOutBtn"
       android:layout_width="103dp"
       android:layout_height="69dp"
+      android:layout_marginTop="5dp"
+      android:layout_marginBottom="10dp"
       android:text="@string/log_out"
-      app:layout_constraintBottom_toTopOf="@+id/map"
+      app:layout_constraintBottom_toTopOf="@+id/recyclerView"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toEndOf="@+id/convoyText"
       app:layout_constraintTop_toTopOf="parent" />
+
+  <androidx.recyclerview.widget.RecyclerView
+      android:id="@+id/recyclerView"
+      android:layout_width="405dp"
+      android:layout_height="155dp"
+      android:layout_marginStart="1dp"
+      android:layout_marginTop="10dp"
+      android:layout_marginEnd="1dp"
+      android:layout_marginBottom="5dp"
+      app:layout_constraintBottom_toTopOf="@+id/map"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/convoyText" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
