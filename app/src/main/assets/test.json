@@ -1,0 +1,5 @@
+{"action":"UPDATE", "data":[{"username":"user1", "firstname":"firstname1", "lastname":"lastname1",
+  "latitude":39.98122720122026, "longitude":-75.15802284477685}, {"username":"user2", "firstname":"firstname2", "lastname":"lastname2",
+  "latitude":39.98047908392102, "longitude":-85.15725036858487}, {"username":"user3", "firstname":"firstname3", "lastname":"lastname3",
+  "latitude":49.97994470940666, "longitude":-75.15726109742086}]}
+
