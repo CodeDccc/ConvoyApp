@@ -28,6 +28,7 @@ public class FirebaseService  extends FirebaseMessagingService {
     double [] lon;
     String [] username;
     String messageUrl;
+    String messengerName;
 
     public FirebaseService(){
         //sendRegistrationToServer("fWzhZlVCQbqgtG_rsSv5ab:APA91bHmGRnx4jhbj9FqiQulu0xZG0qOf50G3_fmpKshiWfruYIABmg314fg4f0yWzlIVfZXCUBxfR5I29F7F3rJ2agajdzMeS3j5R7NkGroypWPz8H-jmemuW58zPXMX0bmdL-mWSCl");
@@ -63,7 +64,9 @@ public class FirebaseService  extends FirebaseMessagingService {
                 JSONObject jsonObject = new JSONObject(remoteMessage.getData().get("payload"));
                 JSONArray usersLocations = jsonObject.getJSONArray("data");
                 messageUrl = jsonObject.getString("message_file");
+                messengerName = jsonObject.getString("username");
                 Log.d("for","RECEIVED MESS3 " + messageUrl);
+                Log.d("for","RECEIVED MESS6543 object " + jsonObject);
                 final int arraySize = usersLocations.length();
                 lat = new double[arraySize];
                 lon = new double[arraySize];
@@ -85,6 +88,7 @@ public class FirebaseService  extends FirebaseMessagingService {
             intent.putExtra("lon", lon);
             Log.d("for","RECEIVED MESS4 " + messageUrl);
             intent.putExtra("message_url", messageUrl);
+            intent.putExtra("username", messengerName);
             LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
             localBroadcastManager.sendBroadcast(intent);
         }

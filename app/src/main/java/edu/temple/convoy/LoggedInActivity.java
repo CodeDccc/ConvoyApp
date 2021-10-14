@@ -26,6 +26,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
@@ -72,7 +73,6 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -86,11 +86,12 @@ import java.util.Map;
 public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCallback, ConvoyControlFragment.ConvoyInterface, ForegroundService.Update{
     String[] strings;
     final static String URLL = "https://kamorris.com/lab/convoy/convoy.php";
-    //ArrayList<String> list = new ArrayList<>();
-    Map<String, String>list = new HashMap<>();
+    ArrayList<String> list = new ArrayList<>();
+    ArrayList<String> audioItem = new ArrayList<>();
+   // Map<String, String>list = new HashMap<>();
     private FloatingActionButton record;
     MediaRecorder mediaRecorder;
-    public static String audioFile = "audio.mp3";//"audio.3gp";
+    public static String audioFile = "audio.3gpp";
     public static int AUDIO_OK = 555;
     Calendar calendar;
     SimpleDateFormat simpleDateFormat;
@@ -128,6 +129,16 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
     MarkerOptions myMarkerOptions = new MarkerOptions();
     //int[] cars = {R.drawable.blue_covertable, R.drawable.blue_limo, R.drawable.red_limo, R.drawable.yellow_car, R.drawable.yellow405_car};
     public static SupportMapFragment mapFragment;
+    private long downloadID;
+    private BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+            if (downloadID == id) {
+                Toast.makeText(LoggedInActivity.this, "Download Completed", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -141,33 +152,17 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         locationManager = getSystemService(LocationManager.class);
         convoyText = findViewById(R.id.convoyText);
 
-        list.put("man", "dog");
-       // list.add("woman");
-       // list.add("child");
-        //list.add("dog");
 
         recyclerView = findViewById(R.id.recyclerView);
         strings = getResources().getStringArray(R.array.prog);
 
-        recyclerAdapter = new RecyclerAdapter(this, list);
+        recyclerAdapter = new RecyclerAdapter(this, list, audioItem);
         recyclerView.setAdapter(recyclerAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-       /* record.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               // list.add("MEOW");
-                list.add(0, "ROAR");
-                recyclerAdapter.notifyDataSetChanged();
-            }
-        });*/
 
         createNotificationChannel();
 
         //Log.d("that", "LOK HER " + getFilePath());
-
-
-       // mediaRecorder.setOutputFile(file);
 
         record = findViewById(R.id.recordAudio);
         record.setVisibility(View.INVISIBLE);
@@ -189,11 +184,8 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
                 != PackageManager.PERMISSION_GRANTED){
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission
                     .RECORD_AUDIO}, AUDIO_OK);
-                    Log.d("wat", "LOK HER1");
-
                 }
                 else{
-                    Log.d("wat", "LOK HER2");
                     getRecorder();
                    // mediaRecorder.start();
                 }
@@ -231,7 +223,8 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            list.put(dateTime, getFilePath());
+            list.add(0, dateTime);
+            audioItem.add(getFilePath());
             recyclerAdapter.notifyDataSetChanged();
             recyclerView.post(new Runnable() {
                 @Override
@@ -247,7 +240,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             }*/
             try {
                 convert(getFilePath());
-            } catch (IOException e) {
+            } catch (IOException | AuthFailureError e) {
                 e.printStackTrace();
             }
             // getVolleySendMessage(this, message1);
@@ -323,6 +316,14 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
          });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(onDownloadComplete);
+        unregisterReceiver(broadcastReceiver);
+    }
+
+
     private void getRecorder() throws IOException {
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -349,19 +350,20 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
     }
 
     private String getFilePath(){
+        //dateTime
         ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
         File audiDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
-        File file = new File(audiDirectory, audioFile);
+        File file = new File(audiDirectory,  audioFile);
         return file.getPath();
     }
-    private File getFile(){
+    private File getFile(){//dateTime+
         ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
         File audiDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
         File file = new File(audiDirectory, audioFile);
         return file;
     }
 
-    private void convert(String path) throws IOException {
+    private void convert(String path) throws IOException, AuthFailureError {
 
         FileInputStream fis = new FileInputStream(path);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -384,7 +386,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
 
         upLoadFile2(bytes);
     }
-    private void upLoadFile2(byte[] file) throws IOException {
+    private void upLoadFile2(byte[] file) throws IOException, AuthFailureError {
         SharedPreferences sharedPref = getSharedPreferences("myPref", MODE_PRIVATE);
         String username = sharedPref.getString("username", null);
         String sessionKey = sharedPref.getString("sessionKey", null);
@@ -394,7 +396,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         params.put("username", username);
         params.put("session_key", sessionKey);
         params.put("convoy_id", convoyId);
-        VolleyMultipartRequest.DataPart dataPart = new VolleyMultipartRequest.DataPart("message_file", file, "/audio/*");
+        VolleyMultipartRequest.DataPart dataPart = new VolleyMultipartRequest.DataPart("message_file", file, "audio/3gpp");
         VolleyMultipartRequest volleyMultipartRequest = new VolleyMultipartRequest(1, URLL,
                 new Response.ErrorListener() {
                     @Override
@@ -445,11 +447,10 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         params.put("session_key", sessionKey);
         params.put("convoy_id", convoyId);
 
-/
+
         HashMap<String, byte[]> fileParams = new HashMap<>();
         fileParams.put("message_file", file);
-/
-/
+
         MultipartRequest mMultipartRequest = new MultipartRequest(URLL,
                 new Response.ErrorListener() {
                     @Override
@@ -481,7 +482,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         mMultipartRequest.setRetryPolicy(new DefaultRetryPolicy(30000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-/
+
         requestQueue.add(mMultipartRequest);
     }
     /**this function uses volley to join a convoy for a user*/
@@ -879,7 +880,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
                 .setAllowedOverMetered(true)
                 .setAllowedOverRoaming(true);
         DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-        downloadManager.enqueue(request);
+        downloadID = downloadManager.enqueue(request);
     }
 
      private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -891,8 +892,15 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             double[] lat = intent.getDoubleArrayExtra("lat");
             double[] lon = intent.getDoubleArrayExtra("lon");
             String messageUrl = intent.getStringExtra("message_url");
+            String messengerName = intent.getStringExtra("username");
             Log.d("for","RECEIVED MESS " + messageUrl);
-            startDownload(messageUrl);
+
+            if(messageUrl!=null){
+                if(messengerName.equals(name)){
+                    startDownload(messageUrl);
+                }
+            }
+
            // String[] username = {"user1", "user2", "user3"};
            // double[] latt = {39.98122720122026 + counter++, 39.98047908392102+counter++, 49.97994470940666+counter++};
             //double[] lonn = {-75.15802284477685 + counter++, -85.15725036858487+counter++, -75.15726109742086+counter++};
@@ -912,9 +920,6 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-
-
 
         }
     };

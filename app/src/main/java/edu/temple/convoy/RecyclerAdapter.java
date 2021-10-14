@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,14 +21,16 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     Context context;
    // String recordingFile;
     String[] strings;
-    //ArrayList<String> list1 = new ArrayList<>();
+    ArrayList<String> list = new ArrayList<>();
+    ArrayList<String> audioItem = new ArrayList<>();
 
-    Map<String, String>list = new HashMap<>();
+    //Map<String, String>list = new HashMap<>();
 
-    public RecyclerAdapter(Context context, Map<String, String>list){
+    public RecyclerAdapter(Context context, ArrayList<String> list, ArrayList<String> audioItem){
         this.context = context;
         //this.recordingFile = recordingFile;
         this.list = list;
+        this.audioItem = audioItem;
     }
 
     @NonNull
@@ -40,10 +43,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerAdapter.MyViewHolder holder, int position) {
-        //holder.audioText.setText(list.);
-        for (Map.Entry<String, String> pair : list.entrySet()) {
-            holder.audioText.setText(pair.getValue() +" " + pair.getKey());
-        }
+        holder.audioText.setText(list.get(position));
     }
 
     @Override
@@ -54,7 +54,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView audioText;
 
-        public MyViewHolder(@NonNull View itemView){//, ItemClicked listener) {
+        public MyViewHolder(@NonNull View itemView){
             super(itemView);
             audioText = itemView.findViewById(R.id.audioTime);
 
@@ -67,24 +67,23 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
                             listener.onItemClick(position);
                         }
                     }*/
-
-                    for (Map.Entry<String, String> pair : list.entrySet()) {
-                        if(pair.getKey().equals(audioText.getText())){
-                            //playList.add(pair.getValue());
-                            AudioManager manager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
-
-                            if(manager.isMusicActive())
-
-                        }
+                    MediaPlayer mediaPlayer = new MediaPlayer();
+                    try {
+                        mediaPlayer.setDataSource(audioItem.get(getAdapterPosition()));
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
+                    Log.d("u", "lok her real adaptor" + getAdapterPosition());
                     Log.d("u", "lok her real " + audioText.getText());
                 }
             });
         }
     }
-    mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+    /*mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
         public void onCompletion(MediaPlayer mp) {
             finish(); // finish current activity
         }
-    });
+    });*/
 }
