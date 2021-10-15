@@ -26,7 +26,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.AssetFileDescriptor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
@@ -78,26 +77,28 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCallback, ConvoyControlFragment.ConvoyInterface, ForegroundService.Update{
     String[] strings;
+    DownloadManager downloadManager;
+   // int addAudioTime = 0;
+    Singleton playlist = Singleton.getInstance();
     final static String URLL = "https://kamorris.com/lab/convoy/convoy.php";
     ArrayList<String> list = new ArrayList<>();
     ArrayList<String> audioItem = new ArrayList<>();
-   // Map<String, String>list = new HashMap<>();
     private FloatingActionButton record;
     MediaRecorder mediaRecorder;
-    public static String audioFile = "audio.3gpp";
+    public static String audioFile2 = "audio.3gp";
     public static int AUDIO_OK = 555;
     Calendar calendar;
     SimpleDateFormat simpleDateFormat;
     String dateTime;
     RecyclerView recyclerView;
-
+    File audioFile;
+    File file2;
     LocationManager locationManager;
     Location myLocation;
     ForegroundService myService;
@@ -111,7 +112,6 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
     private LatLng latLng;
     private final String NAME = "username";
     private final String KEY = "sessionKey";
-    //private final String CONID = "convoyId";
     private ArrayList<String> otherUsers = new ArrayList<>();
     private static final Map<String, Vehicle> param = new HashMap<>();
     private static Vehicle[] vehicles;
@@ -124,15 +124,15 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
     Boolean joinedConvoy = false;
     GoogleMap map;
     Marker marker;
-    String message1;
     RecyclerAdapter recyclerAdapter;
     MarkerOptions myMarkerOptions = new MarkerOptions();
-    //int[] cars = {R.drawable.blue_covertable, R.drawable.blue_limo, R.drawable.red_limo, R.drawable.yellow_car, R.drawable.yellow405_car};
+
     public static SupportMapFragment mapFragment;
     private long downloadID;
     private BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            //String downloadItem = intent.getStringExtra(DownloadManager.E)
             long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
             if (downloadID == id) {
                 Toast.makeText(LoggedInActivity.this, "Download Completed", Toast.LENGTH_SHORT).show();
@@ -162,7 +162,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
 
         createNotificationChannel();
 
-        //Log.d("that", "LOK HER " + getFilePath());
+        //Log.d("that", "LOOK HERE " + getFilePath());
 
         record = findViewById(R.id.recordAudio);
         record.setVisibility(View.INVISIBLE);
@@ -173,13 +173,16 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         sendRecord = findViewById(R.id.sendrecord);
         sendRecord.setVisibility(View.INVISIBLE);
 
+        MediaPlayer mediaPlayer = new MediaPlayer();
         record.setOnClickListener(v -> {
             cancelRecord.setVisibility(View.VISIBLE);
             sendRecord.setVisibility(View.VISIBLE);
             record.setVisibility(View.INVISIBLE);
+            calendar = Calendar.getInstance();
+            simpleDateFormat = new SimpleDateFormat("dd.LLL.yyyy HH:mm:ss");
+            dateTime = simpleDateFormat.format(calendar.getTime());
 
             try {
-               // mediaRecorder.prepare();
                 if(ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED){
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission
@@ -187,18 +190,10 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
                 }
                 else{
                     getRecorder();
-                   // mediaRecorder.start();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Long dateValueInLong = System.currentTimeMillis();
-            Date currentTime = Calendar.getInstance().getTime();
-           // Log.d("rel", "lok her333 " + currentTime);
-            calendar = Calendar.getInstance();
-            simpleDateFormat = new SimpleDateFormat("dd.LLL.yyyy HH:mm:ss");
-            dateTime = simpleDateFormat.format(calendar.getTime());
-           // Log.d("rel", "lok her333 " + dateTime);
         });
 
         cancelRecord.setOnClickListener(v -> {
@@ -209,40 +204,44 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
             mediaRecorder.release();
         });
 
+
         sendRecord.setOnClickListener(v -> {
             sendRecord.setVisibility(View.INVISIBLE);
             cancelRecord.setVisibility(View.INVISIBLE);
             record.setVisibility(View.VISIBLE);
+
             mediaRecorder.stop();
             mediaRecorder.release();
-            MediaPlayer mediaPlayer = new MediaPlayer();
+
             try {
-                mediaPlayer.setDataSource(getFilePath());
+                mediaPlayer.reset();
+                Log.d("check", "mediaPlayer" + audioFile.getAbsolutePath());
+                mediaPlayer.setDataSource(audioFile.getAbsolutePath());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
             } catch (IOException e) {
                 e.printStackTrace();
             }
             list.add(0, dateTime);
-            audioItem.add(getFilePath());
+            audioItem.add(audioFile.getAbsolutePath());
             recyclerAdapter.notifyDataSetChanged();
             recyclerView.post(new Runnable() {
                 @Override
                 public void run() {
                     // Call smooth scroll
-                    recyclerView.smoothScrollToPosition(recyclerAdapter.getItemCount() - 1);
+                    recyclerView.smoothScrollToPosition(recyclerAdapter.getItemCount());
                 }
             });
-           /* try {
-                upLoadFile(getFilePath());
+            try {
+                upLoadFile(audioFile);
             } catch (IOException e) {
                 e.printStackTrace();
-            }*/
-            try {
+            }
+            /*try {
                 convert(getFilePath());
             } catch (IOException | AuthFailureError e) {
                 e.printStackTrace();
-            }
+            }*/
             // getVolleySendMessage(this, message1);
         });
 
@@ -326,14 +325,13 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void getRecorder() throws IOException {
         mediaRecorder = new MediaRecorder();
+        audioFile = new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) + "/" + dateTime + audioFile2);
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mediaRecorder.setOutputFile(getFilePath());
+        mediaRecorder.setOutputFile(audioFile.getAbsolutePath());
         mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
         mediaRecorder.prepare();
         mediaRecorder.start();
-
-       // mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.);
     }
 
     /**a notification is required for a foreground service*/
@@ -349,17 +347,16 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         notificationManager.createNotificationChannel(notificationChannel);
     }
 
-    private String getFilePath(){
-        //dateTime
+   /* private String getFilePath(){
         ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
         File audiDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
         File file = new File(audiDirectory,  audioFile);
         return file.getPath();
-    }
-    private File getFile(){//dateTime+
+    }*/
+    private File getFile(){
         ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
         File audiDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
-        File file = new File(audiDirectory, audioFile);
+        File file = new File(audiDirectory, audioFile2);
         return file;
     }
 
@@ -411,7 +408,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
                     @Override
                     public void onResponse(NetworkResponse response) {
                         Log.d("not", "did " + "came here1");
-                        Log.d("not", "did10 " + response);
+                        Log.d("not", "did10Response " + response.toString());
                         try {
                             JSONObject jsonObject = new JSONObject(String.valueOf(response.data));
                             String result = jsonObject.getString("status");
@@ -432,7 +429,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         requestQueue.add(volleyMultipartRequest);
     }
 
-    private void upLoadFile(byte[] file) throws IOException {
+    private void upLoadFile(File file) throws IOException {
         //File file = new File(String.valueOf(newFile));
         Log.d("for","RECEIVED MESS5 " + file);
         SharedPreferences sharedPref = getSharedPreferences("myPref", MODE_PRIVATE);
@@ -448,7 +445,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         params.put("convoy_id", convoyId);
 
 
-        HashMap<String, byte[]> fileParams = new HashMap<>();
+        HashMap<String, File> fileParams = new HashMap<>();
         fileParams.put("message_file", file);
 
         MultipartRequest mMultipartRequest = new MultipartRequest(URLL,
@@ -477,7 +474,7 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
                             e.printStackTrace();
                         }
                     }
-                }, fileParams, params, file
+                }, params, fileParams
         );
         mMultipartRequest.setRetryPolicy(new DefaultRetryPolicy(30000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
@@ -869,18 +866,23 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void startDownload(String url) {
-       // File file = new File(getExternalFilesDir(null), "New File");
-
+       file2 = new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) + "/DDD" + dateTime + audioFile2);
+        Log.d("for","RECEIVED MESS IN BROADCAST download " + file2.getAbsolutePath());
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
+                .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI)
                 .setTitle("New File")
                 .setDescription("Downloading")
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
-                .setDestinationUri(Uri.fromFile(getFile()))
                 .setRequiresCharging(false)
                 .setAllowedOverMetered(true)
-                .setAllowedOverRoaming(true);
-        DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                .setAllowedOverRoaming(true)
+                .setDestinationUri(Uri.fromFile(file2))
+                .setMimeType("audio/*");
+        downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        Log.d("not","RECEIVED below download");
         downloadID = downloadManager.enqueue(request);
+        Log.d("not","RECEIVED below downloadID " + downloadID);
+
     }
 
      private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -888,39 +890,44 @@ public class LoggedInActivity extends AppCompatActivity implements OnMapReadyCal
         @Override
         public void onReceive(Context context, Intent intent) {
             System.out.println("WHAT IS GOING ON? 1");
-            String[] username = intent.getStringArrayExtra("username");
-            double[] lat = intent.getDoubleArrayExtra("lat");
-            double[] lon = intent.getDoubleArrayExtra("lon");
-            String messageUrl = intent.getStringExtra("message_url");
-            String messengerName = intent.getStringExtra("username");
-            Log.d("for","RECEIVED MESS " + messageUrl);
-
-            if(messageUrl!=null){
-                if(messengerName.equals(name)){
-                    startDownload(messageUrl);
-                }
+            if(intent.getBooleanExtra("isData", false)) {
+                String[] username = intent.getStringArrayExtra("username");
+                double[] lat = intent.getDoubleArrayExtra("lat");
+                double[] lon = intent.getDoubleArrayExtra("lon");
             }
+            if(intent.getBooleanExtra("isMessage", false)) {
+                String messageUrl = intent.getStringExtra("message_url");
+                String messengerName = intent.getStringExtra("username");
+                Log.d("for", "RECEIVED MESS IN BROADCAST" + messageUrl);
 
-           // String[] username = {"user1", "user2", "user3"};
-           // double[] latt = {39.98122720122026 + counter++, 39.98047908392102+counter++, 49.97994470940666+counter++};
-            //double[] lonn = {-75.15802284477685 + counter++, -85.15725036858487+counter++, -75.15726109742086+counter++};
-            //updateOthersLocation(lat, lon, username);
-            /**TODO: receivedMessage(username, messageUrl)*/
-
-            MediaPlayer mediaPlayer = new MediaPlayer();
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            try {
-                if(messageUrl!=null) {
-                    Log.d("for","RECEIVED LON IS " + messageUrl);
-                    mediaPlayer.setDataSource(messageUrl);
-                    mediaPlayer.prepare();
-                    mediaPlayer.start();
-                    Log.d("for","RECEIVED MESS2 " + messageUrl);
+                if (messageUrl != null) {
+                    if (messengerName.equals(name)) {
+                        Log.d("for", "RECEIVED inside function " + messageUrl);
+                        startDownload(messageUrl);
+                    }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
+
+                // String[] username = {"user1", "user2", "user3"};
+                // double[] latt = {39.98122720122026 + counter++, 39.98047908392102+counter++, 49.97994470940666+counter++};
+                //double[] lonn = {-75.15802284477685 + counter++, -85.15725036858487+counter++, -75.15726109742086+counter++};
+                //updateOthersLocation(lat, lon, username);
+                /**TODO: receivedMessage(username, messageUrl)*/
+
+                MediaPlayer mediaPlayer = new MediaPlayer();
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                try {
+                    if (messageUrl != null) {
+                        Log.d("for", "RECEIVED LON IS " + messageUrl);
+                        mediaPlayer.setDataSource(messageUrl);
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                        Log.d("for", "RECEIVED MESS2 " + messageUrl);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }//end of bool check
         }
     };
 

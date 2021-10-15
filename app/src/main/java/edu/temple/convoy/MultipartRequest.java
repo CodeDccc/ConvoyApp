@@ -14,9 +14,11 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.util.CharsetUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -27,12 +29,12 @@ public class MultipartRequest extends Request<String> {
     MultipartEntityBuilder entity = MultipartEntityBuilder.create();
     private static HttpEntity httpentity;
     private final Response.Listener<String> mListener;
-    private final HashMap<String, byte[]> mFileParts;
+    private final HashMap<String, File> mFileParts;
     private final Map<String, String> mStringPart;
    // private final Map<String, String> header;
     public MultipartRequest(String url, Response.ErrorListener errorListener,
-                            Response.Listener<String> listener, HashMap<String, byte[]> files,
-                            Map<String, String> mStringPart, byte[] bytes) {
+                            Response.Listener<String> listener,
+                            Map<String, String> mStringPart, HashMap<String, File> files) {
         super(Method.POST, url, errorListener);
         this.mListener = listener;
         this.mFileParts = files;
@@ -49,9 +51,9 @@ public class MultipartRequest extends Request<String> {
     }
     private void buildMultipartEntity() {
         if (mFileParts != null) {
-            for (Map.Entry<String, byte[]> entry : mFileParts.entrySet()) {
+            for (Map.Entry<String, File> entry : mFileParts.entrySet()) {
                 Log.d("key", "did 2 " + entry.getKey());
-                entity.addPart(entry.getKey(), new ByteArrayBody(entry.getValue(), ContentType.DEFAULT_BINARY, null)); //new FileBody(, .length);////ContentType.create("image/*"), entry.getValue().getName()));
+                entity.addPart(entry.getKey(), new FileBody(entry.getValue() ,ContentType.create("audio/*"), entry.getValue().getName()));
             }
         }
         //entity.addPart(FILE_PART_NAME, new FileBody(mFilePart, ContentType.create("image/jpeg"), mFilePart.getName()));

@@ -23,6 +23,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     String[] strings;
     ArrayList<String> list = new ArrayList<>();
     ArrayList<String> audioItem = new ArrayList<>();
+    //MediaPlayer mediaPlayer = new MediaPlayer();
 
     //Map<String, String>list = new HashMap<>();
 
@@ -68,8 +69,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
                         }
                     }*/
                     MediaPlayer mediaPlayer = new MediaPlayer();
+                   // mediaPlayer.reset();
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                     try {
                         mediaPlayer.setDataSource(audioItem.get(getAdapterPosition()));
+                        Log.d("u", "lok her realfile " + audioItem.get(getAdapterPosition()));
                         mediaPlayer.prepare();
                         mediaPlayer.start();
                     } catch (IOException e) {

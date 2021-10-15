@@ -60,35 +60,47 @@ public class FirebaseService  extends FirebaseMessagingService {
            // Log.d("check", "i saw " + remoteMessage.getData().toString());
             // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
+            Intent intent = new Intent("edu.temple.convoy_FCM");
             try {
                 JSONObject jsonObject = new JSONObject(remoteMessage.getData().get("payload"));
-                JSONArray usersLocations = jsonObject.getJSONArray("data");
-                messageUrl = jsonObject.getString("message_file");
-                messengerName = jsonObject.getString("username");
-                Log.d("for","RECEIVED MESS3 " + messageUrl);
-                Log.d("for","RECEIVED MESS6543 object " + jsonObject);
-                final int arraySize = usersLocations.length();
-                lat = new double[arraySize];
-                lon = new double[arraySize];
-                username = new String[arraySize];
-                for(int i = 0; i < arraySize; i++){
-                    JSONObject object = usersLocations.getJSONObject(i);
-                    lat[i] = object.getDouble("latitude");
-                    lon[i] = object.getDouble("longitude");
-                    username[i] = object.getString("username");
-                    //messageUrl[i] = object.getString("message_url");
-                   // Log.d("my", "WATCH " + username[i]);
+
+
+
+                if(jsonObject.getString("action").equals("UPDATE")){
+                    JSONArray usersLocations = jsonObject.getJSONArray("data");
+                    final int arraySize = usersLocations.length();
+                    lat = new double[arraySize];
+                    lon = new double[arraySize];
+                    username = new String[arraySize];
+                    for(int i = 0; i < arraySize; i++) {
+                        JSONObject object = usersLocations.getJSONObject(i);
+                        lat[i] = object.getDouble("latitude");
+                        lon[i] = object.getDouble("longitude");
+                        username[i] = object.getString("username");
+                    }
+                    intent.putExtra("username", username);
+                    intent.putExtra("lat", lat);
+                    intent.putExtra("lon", lon);
+                    intent.putExtra("isMessage", false);
+                    intent.putExtra("isData", true);
                 }
-            } catch (JSONException e) {
+
+                if(jsonObject.getString("action").equals("MESSAGE")){
+                    messageUrl = jsonObject.getString("message_file");
+                    messengerName = jsonObject.getString("username");
+                    Log.d("for","RECEIVED MESS3 " + messageUrl);
+                    Log.d("for","RECEIVED MESS6543 object " + jsonObject);
+                    Log.d("for","RECEIVED MESS4 " + messageUrl);
+                    intent.putExtra("message_url", messageUrl);
+                    intent.putExtra("username", messengerName);
+                    intent.putExtra("isData", false);
+                    intent.putExtra("isMessage", true);
+                }
+                //messageUrl[i] = object.getString("message_url");
+                   // Log.d("my", "WATCH " + username[i]);
+                } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Intent intent = new Intent("edu.temple.convoy_FCM");
-            intent.putExtra("username", username);
-            intent.putExtra("lat", lat);
-            intent.putExtra("lon", lon);
-            Log.d("for","RECEIVED MESS4 " + messageUrl);
-            intent.putExtra("message_url", messageUrl);
-            intent.putExtra("username", messengerName);
             LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
             localBroadcastManager.sendBroadcast(intent);
         }
